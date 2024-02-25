@@ -89,6 +89,7 @@ static s32 e1000_set_lplu_state_pchlan(struct e1000_hw *hw, bool active);
 static s32 e1000_id_led_init_pchlan(struct e1000_hw *hw);
 static s32 e1000_disable_ulp_lpt_lp(struct e1000_hw *hw, bool force);
 static s32 e1000_setup_copper_link_pch_lpt(struct e1000_hw *hw);
+static s32 e1000_reset_hw_ich8lan(struct e1000_hw *hw);
 static s32 e1000_cleanup_led_ich8lan(struct e1000_hw *hw);
 static s32 e1000_led_on_ich8lan(struct e1000_hw *hw);
 static s32 e1000_led_off_ich8lan(struct e1000_hw *hw);
@@ -429,8 +430,12 @@ static s32 e1000_init_phy_params_pchlan(struct e1000_hw *hw)
 	phy->id = e1000_phy_unknown;
 
 	ret_val = e1000_init_phy_workarounds_pchlan(hw);
-	if (ret_val)
-		return ret_val;
+	if (ret_val) {
+		e1000_reset_hw_ich8lan(hw);
+		ret_val = e1000_init_phy_workarounds_pchlan(hw);
+		if (ret_val)
+			return ret_val;
+	}
 
 	if (phy->id == e1000_phy_unknown)
 		switch (hw->mac.type) {
